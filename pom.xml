@@ -20,6 +20,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <springboot.version>2.2.4.RELEASE</springboot.version>
+        <springboot.activemq.version>2.1.2.RELEASE</springboot.activemq.version>
     </properties>
 
 
@@ -28,6 +29,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
             <version>${springboot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-activemq</artifactId>
+            <version>${springboot.activemq.version}</version>
         </dependency>
 
         <dependency>

@@ -1,9 +1,8 @@
-package Test;
+package test;
 
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 /**
