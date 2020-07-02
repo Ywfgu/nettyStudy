@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- ========================================此部分一般不用修改============================================== -->
+    <!--配置重连重发策略-->
+    <bean id="redeliveryPolicy" class="org.apache.activemq.RedeliveryPolicy">
+        <!--是否在每次尝试重新发送失败后,增长这个等待时间 -->
+        <property name="useExponentialBackOff" value="true"/>
+        <!--重发次数,默认为6次   这里设置为10次-->
+        <property name="maximumRedeliveries" value="10"/>
+        <!--重发时间间隔,默认为1秒-->
+        <property name="initialRedeliveryDelay" value="1"/>
+        <!--第一次失败后重新发送之前等待500毫秒,第二次失败再等待500 * 2毫秒,这里的2就是value-->
+        <property name="backOffMultiplier" value="2"/>
+        <!--是否避免消息碰撞-->
+        <property name="useCollisionAvoidance" value="false"/>
+        <!--设置重发最大拖延时间-1 表示没有拖延只有UseExponentialBackOff(true)为true时生效-->
+        <property name="maximumRedeliveryDelay" value="-1"/>
+    </bean>
+    <!--配置连接工厂-->
+    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${inner.activemq.url}"/>
+        <property name="userName" value="${inner.activemq.username}"/>
+        <property name="password" value="${inner.activemq.password}"/>
+        <property name="redeliveryPolicy" ref="redeliveryPolicy"/>
+        <!-- 异步发送，可以提高吞吐量，但是会有数据丢失 -->
+        <property name="useAsyncSend" value="true"/>
+    </bean>
+    <!--配置连接池工程-->
+    <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!--最大连接数-->
+        <property name="maxConnections" value="${inner.activemq.maxConnection}"/>
+        <!--每个连接的最大session活跃数-->
+        <property name="maximumActiveSessionPerConnection" value="${inner.activemq.maximumActiveSessionPerConnection}"/>
+        <!--空闲线程逐出延时时间-->
+        <property name="timeBetweenExpirationCheckMillis" value="${inner.activemq.TimeBetweenExpirationCheckMillis}"/>
+    </bean>
+    <!-- 创建监听容器的工厂类 -->
+    <bean id="jmsActiveMQQueueListener" class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="pooledConnectionFactory"/>
+        <property name="concurrency" value="1-1"/>
+        <property name="recoveryInterval" value="1000"/>
+        <property name="sessionAcknowledgeMode" value="2"/>
+        <property name="pubSubDomain" value="false"/>
+    </bean>
+    <!--配置Spring框架提供的JmsTemplate-->
+    <bean id="jmsActiveMQQueueTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!-- 这个connectionFactory对应的是我们定义的Spring提供的那个ConnectionFactory对象 -->
+        <property name="connectionFactory" ref="pooledConnectionFactory"/>
+        <!-- NON_PERSISTENT非持久化 1 ，PERSISTENT持久化 2 -->
+        <property name="deliveryMode" value="2"/>
+        <!-- 是否主题订阅 -->
+        <property name="pubSubDomain" value="false"/>
+        <property name="receiveTimeout" value="1000"/>
+        <!-- 分片receiver模式下，需要设置手动签收 -->
+        <!--<property name="sessionAcknowledgeMode" value="4"/>-->
+    </bean>
+    <bean id="jmsActiveMQTopicTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!-- 这个connectionFactory对应的是我们定义的Spring提供的那个ConnectionFactory对象 -->
+        <property name="connectionFactory" ref="pooledConnectionFactory"/>
+        <!-- NON_PERSISTENT非持久化 1 ，PERSISTENT持久化 2 -->
+        <property name="deliveryMode" value="2"/>
+        <!-- 是否主题订阅 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="receiveTimeout" value="1000"/>
+    </bean>
+    <bean id="jmsActiveMQTopicPersistentTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!-- 这个connectionFactory对应的是我们定义的Spring提供的那个ConnectionFactory对象 -->
+        <property name="connectionFactory" ref="pooledConnectionFactory"/>
+        <!-- NON_PERSISTENT非持久化 1 ，PERSISTENT持久化 2 -->
+        <property name="deliveryMode" value="2"/>
+        <!-- 是否主题订阅 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="receiveTimeout" value="1000"/>
+    </bean>
+    <!-- ========================================此部分一般不用修改============================================== -->
+
+</beans>

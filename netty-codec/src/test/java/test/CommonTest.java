@@ -1,10 +1,9 @@
-package Test;
+package test;
 
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -139,6 +138,43 @@ public class CommonTest {
         }
     }
     <String, T, Alibaba> String get(String string, T t) { return string; }
+
+
+    @Test
+    public void test(){
+        String s = "A man, a plan, a canal: Panama";
+        System.out.println(isPalindrome(s));
+    }
+
+    public boolean isPalindrome(String s) {
+        //int length = s.length();
+        //if(length <= 1) return true;
+        //s = s.toLowerCase();
+        int left = 0;
+        int right = s.length()-1;
+        while(left < right){
+            while(left < right
+                    && !((s.charAt(left) >= 'a' && s.charAt(left) <= 'z')
+                    //|| (s.charAt(left) >= 'A' && s.charAt(left) <= 'Z')
+                    || (s.charAt(left) >= '0' && s.charAt(left) <= '9'))){
+                left ++;
+            }
+            while(left < right
+                    && !((s.charAt(right) >= 'a' && s.charAt(right) <= 'z')
+                    //|| (s.charAt(right) >= 'A' && s.charAt(right) <= 'Z')
+                    || (s.charAt(right) >= '0' && s.charAt(right) <= '9'))){
+                right --;
+            }
+            //System.out.println(s.charAt(left) +" compare to "+ s.charAt(right));
+            if(left < right
+                    && Math.abs(s.charAt(left)- s.charAt(right)) == 32 ){
+                return false;
+            }
+            left++;
+            right--;
+        }
+        return true;
+    }
 
 
 }

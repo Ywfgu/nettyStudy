@@ -1,9 +1,9 @@
-package Test;
+package test;
 
+import com.sun.deploy.util.StringUtils;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.concurrent.locks.Lock;
 
 /**
  * @author guht
@@ -152,23 +152,69 @@ public class Solution {
         }
     }
 
+    public String serialize(TreeNode root) {
+        List<String> res = new ArrayList<>();
+        LinkedList<TreeNode> deque = new LinkedList<>();
+        deque.addLast(root);
+        while (!deque.isEmpty()){
+            TreeNode node = deque.pop();
+            if(node != null){
+
+                res.add(String.valueOf(node.val));
+
+                deque.addLast(node.left);
+
+                deque.addLast(node.right);
+            }else{
+                res.add("null");
+            }
+        }
+        return Arrays.toString(res.toArray());
+    }
+    public TreeNode deserialize(String data) {
+        String[] sarr = data.substring(1, data.length()-1).replaceAll(" ","").split(",");
+        if(sarr[0].isEmpty()) return null;
+        LinkedList<TreeNode> deque = new LinkedList<>();
+        TreeNode root = new TreeNode(Integer.valueOf(sarr[0]));
+        deque.addLast(root);
+        int i = 1;
+        while (!deque.isEmpty()){
+            TreeNode node = deque.pop();
+            if(node != null){
+                if(!Objects.equals(sarr[i], "null")){
+                    node.left = new TreeNode(Integer.valueOf(sarr[i]));
+                }
+                if(!Objects.equals(sarr[i+1], "null")){
+                    node.right = new TreeNode(Integer.valueOf(sarr[i+1]));
+                }
+                i += 2;
+                deque.addLast(node.left);
+                deque.addLast(node.right);
+            }
+        }
+        return root;
+    }
+
     /**
      * 输出二叉树每层的数字集合
      */
     @Test
     public void TestlevelOrder(){
-        TreeNode n1 = new TreeNode(3);
-        TreeNode n2 = new TreeNode(9);
-        TreeNode n3 = new TreeNode(20);
-        TreeNode n4 = new TreeNode(15);
-        TreeNode n5 = new TreeNode(7);
+        TreeNode n1 = new TreeNode(1);
+        TreeNode n2 = new TreeNode(2);
+        TreeNode n3 = new TreeNode(3);
+        TreeNode n4 = new TreeNode(4);
+        TreeNode n5 = new TreeNode(5);
 
         n1.left = n2;
         n1.right = n3;
 
         n3.left = n4;
         n3.right = n5;
-        System.out.println(levelOrder(n1));
+//        System.out.println(levelOrder(n1));
+        String s = serialize(n1);
+        TreeNode deserialize = deserialize("[]");
+        System.out.println("ok");
     }
 
     public class ListNode {
@@ -311,4 +357,199 @@ public class Solution {
         int[] nums = {1,1,2,2,3};
         System.out.println(singleNumber(nums));
     }
+
+    public int subarraySum(int[] nums, int k) {
+        int count = 0;
+        for (int i = 1; i <= nums.length; i++) {
+            //获取固定长度的可能性
+            count = count + getCountByLeng(nums,i, k);
+        }
+        return count;
+    }
+    public int getCountByLeng(int[] nums, int length , int k){
+        int count = 0;
+        for (int i = 0; i <= nums.length - length; i++) {
+            if(getCountStartEnd(nums,i,i+length) ==k ){
+                count++;
+            }
+        }
+        System.out.println("长度为"+length+"的有"+count+"种可能");
+        return count;
+    }
+    public int getCountStartEnd(int[] nums, int start, int end){
+        int sum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if(i>= start && i<= end){
+                sum += nums[i];
+            }
+        }
+        return sum;
+    }
+    @Test
+    public void testsubarraySum(){
+        int[] nums = {1,2,3};
+        System.out.println(subarraySum(nums,3));
+    }
+
+    public boolean validPalindrome(String s) {
+
+        int head = 0;
+        int tail = s.length()-1;
+        while (head < tail){
+            if(s.charAt(head) == s.charAt(tail)){
+                head++;
+                tail--;
+            }else {
+                boolean f1 =true;
+                boolean f2 =true;
+                for (int i = head+1,j = tail; i < j; i++,j--) {
+                    if(s.charAt(i) != s.charAt(j)){
+                        f1 = false;break;
+                    }
+                }
+                for (int i = head,j = tail-1; i < j; i++,j--) {
+                    if(s.charAt(i) != s.charAt(j)){
+                        f2 = false;break;
+                    }
+                }
+                return f1 || f2;
+
+            }
+
+        }
+        return true;
+    }
+
+    /**
+     * 是否回文字符串
+     */
+    @Test
+    public void TestvalidPalindrome() {
+        System.out.println(validPalindrome("eedede"));
+    }
+
+    public double myPow(double x, int n) {
+        long N = n;
+        double res = 1.0;
+        if(x == 1.0){
+            return x;
+        }
+        long count = N;
+        double X = x;
+        if(N<0){
+            count = -N;
+            X = 1/x;
+        }
+        for(long i=0; i<count; i++){
+            res = res*X;
+        }
+        return res;
+    }
+    @Test
+    public void TestmyPow(){
+        System.out.println(myPow(2.000,-2147483648));
+    }
+
+
+    public int rob2(int[] nums) {
+        int n = nums.length;
+        if(n == 0){
+            return 0;
+        }
+        if(n == 1){
+            return nums[0];
+        }
+
+        int[] dp = new int[n];
+        dp[0] = nums[0];
+        dp[1] = Math.max(nums[0], nums[1]);
+        for(int i =2; i < n; i++){
+            dp[i] = Math.max(dp[i-1], dp[i-2] + nums[i]);
+        }
+        return dp[n-1];
+    }
+
+    @Test
+    public void testrob2(){
+        rob2(new int[]{1,2,3,3});
+    }
+
+
+    public ListNode partition(ListNode head, int x) {
+        ListNode before = new ListNode(-1);
+        ListNode beforelast = before;
+        ListNode after = new ListNode(-1);
+        ListNode afterlast = after;
+
+        ListNode pre = head;
+        while(pre != null){
+            if(pre.val < x){
+                beforelast.next = pre;
+                beforelast = beforelast.next;
+                beforelast.next = null;
+            }else{
+                afterlast.next = pre;
+                afterlast = afterlast.next;
+                afterlast.next = null;
+            }
+            pre = pre.next;
+        }
+
+        beforelast.next = after.next;
+        return before.next;
+    }
+
+    @Test
+    public void testpartition(){
+        ListNode a1 = new ListNode(1);
+        ListNode a2 = new ListNode(4);
+        ListNode a3 = new ListNode(3);
+        ListNode b1 = new ListNode(2);
+        ListNode b2 = new ListNode(5);
+        ListNode b3 = new ListNode(2);
+        a1.next = a2;
+        a2.next = a3;
+        a3.next = b1;
+        b1.next = b2;
+        b2.next = b3;
+        ListNode node = partition(a1,3);
+        System.out.println(node);
+    }
+
+    public boolean isPalindrome(int x) {
+//        String s = String.valueOf(x);
+//
+//        int i =0;
+//        int j = s.length()-1;
+//
+//        while( i < j){
+//            if(s.charAt(i) != s.charAt(j)) return false;
+//            i++;
+//            j--;
+//        }
+//        return true;
+        if(x < 0 ) return false;
+
+        int y=0;
+        int cal = x;
+        while(cal > 0){
+            y = y*10 + cal%10;
+            cal = cal/10;
+        }
+        return x == y;
+    }
+
+    @Test
+    public void testisPalindrome(){
+        isPalindrome(1221);
+    }
+
+
+    public void BrowserHistory(){
+        Stack<String> history = new Stack();
+        history.push("a");
+        history.push("b");
+        history.push("c");
+    }
+
 }
