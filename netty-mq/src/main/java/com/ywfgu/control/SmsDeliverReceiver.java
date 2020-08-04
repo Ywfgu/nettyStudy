@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author guht
@@ -18,6 +19,8 @@ import java.util.Stack;
 public class SmsDeliverReceiver {
     private static Logger logger = LoggerFactory.getLogger(SmsDeliverReceiver.class);
 
+    private static volatile AtomicInteger tongji = new AtomicInteger(0);
+
     @RequestMapping(value="/hello",method= RequestMethod.GET )
     public String sayHello(@RequestParam(value ="name") String name){
         logger.info("hello {}!", name);
@@ -26,7 +29,7 @@ public class SmsDeliverReceiver {
 
     @RequestMapping(value="/sms/deliver",method= RequestMethod.POST )
     public String smsRec(@RequestParam(value ="msg") String msg){
-        logger.info("receive msg ={}", msg);
+        logger.info("receive msg now is {}, {}", tongji.incrementAndGet(), msg);
         return "ok";
     }
 }

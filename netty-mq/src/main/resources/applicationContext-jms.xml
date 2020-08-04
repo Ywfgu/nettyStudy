@@ -18,6 +18,10 @@
         <!--设置重发最大拖延时间-1 表示没有拖延只有UseExponentialBackOff(true)为true时生效-->
         <property name="maximumRedeliveryDelay" value="-1"/>
     </bean>
+    <bean id="activeMQPrefetchPolicy" class="org.apache.activemq.ActiveMQPrefetchPolicy">
+        <property name="queuePrefetch" value="1"/>
+        <property name="topicPrefetch" value="1"/>
+    </bean>
     <!--配置连接工厂-->
     <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
         <property name="brokerURL" value="${inner.activemq.url}"/>
@@ -26,6 +30,7 @@
         <property name="redeliveryPolicy" ref="redeliveryPolicy"/>
         <!-- 异步发送，可以提高吞吐量，但是会有数据丢失 -->
         <property name="useAsyncSend" value="true"/>
+        <property name="prefetchPolicy" ref="activeMQPrefetchPolicy"/>
     </bean>
     <!--配置连接池工程-->
     <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
@@ -45,6 +50,25 @@
         <property name="sessionAcknowledgeMode" value="2"/>
         <property name="pubSubDomain" value="false"/>
     </bean>
+    <!-- 创建监听容器的工厂类 持久化订阅者 -->
+    <bean id="jmsActiveMQTopicDurableListener" class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="pooledConnectionFactory"/>
+        <property name="concurrency" value="1-1"/>
+        <property name="recoveryInterval" value="1000"/>
+        <property name="sessionAcknowledgeMode" value="2"/>
+        <property name="pubSubDomain" value="true"/>
+        <property name="clientId" value="test"/>
+        <property name="subscriptionDurable" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+    </bean>
+    <!-- 创建监听容器的工厂类 非持久化订阅者 -->
+    <bean id="jmsActiveMQTopicListener" class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="pooledConnectionFactory"/>
+        <property name="concurrency" value="1-1"/>
+        <property name="recoveryInterval" value="1000"/>
+        <property name="sessionAcknowledgeMode" value="2"/>
+        <property name="pubSubDomain" value="true"/>
+    </bean>
     <!--配置Spring框架提供的JmsTemplate-->
     <bean id="jmsActiveMQQueueTemplate" class="org.springframework.jms.core.JmsTemplate">
         <!-- 这个connectionFactory对应的是我们定义的Spring提供的那个ConnectionFactory对象 -->
@@ -54,6 +78,7 @@
         <!-- 是否主题订阅 -->
         <property name="pubSubDomain" value="false"/>
         <property name="receiveTimeout" value="1000"/>
+        <property name="timeToLive" value="3000"/>
         <!-- 分片receiver模式下，需要设置手动签收 -->
         <!--<property name="sessionAcknowledgeMode" value="4"/>-->
     </bean>
