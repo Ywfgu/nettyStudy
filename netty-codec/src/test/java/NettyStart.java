@@ -11,6 +11,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author guht
@@ -19,8 +21,10 @@ import org.junit.Test;
  */
 public class NettyStart {
 
+    private static final Logger logger = LoggerFactory.getLogger(NettyStart.class);
     @Test
     public void testServer() throws Exception {
+        logger.info("start ...");
         EventLoopGroup boss = new NioEventLoopGroup(1);
         EventLoopGroup work = new NioEventLoopGroup(1);
 
